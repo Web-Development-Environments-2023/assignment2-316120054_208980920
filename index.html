@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<!-- Fig. 14.26: cannon.html -->
+<!-- Cannon Game HTML5 document. -->
+<html>
+<center>
+   <head>
+      <meta charset = "utf-8">
+      <title>Starship Game</title>
+      <style type = "text/css">
+      </style>
+	   <script src = "starships.js"></script>
+   </head>
+   <body>
+    <section id="welcome_page">
+        IDS:</br>
+        Tal Abraham: 208980920</br>
+        Roi Hass: 316120054</br>
+        
+      <p><input id = "sign_in_click" onclick ="sign_in_click()" type = "button" value = "sign in">
+      </p>
+      <p><input id = "sign_up_click" onclick ="sign_up_click()" type = "button" value = "sign up">
+      </section>
+    <section id="sign-in" style="display: none;">
+        <div class="container">
+            <label for="uname"><b>Username</b></label>
+            <input id="username" type="text" placeholder="Enter Username" name="uname" required>
+        
+            <label for="psw"><b>Password</b></label>
+            <input id="password" type="password" placeholder="Enter Password" name="psw" required>
+            <input id = "sign_in" onclick ="sign_in_check()" type = "button" value = "sign in">
+          </div>
+    </section>
+    <section id="sign-up" style="display: none;">
+        <div class="signup">
+            <label for="uname"><b>Username</b></label>
+            <input id="username" type="text" placeholder="Enter Username" name="uname" required>
+            <label for="psw"><b>Password</b></label>
+            <input id="password" type="password" placeholder="Enter Password" name="psw" id="psw" required>
+            <label for="psw-repeat"><b>Repeat Password</b></label>
+            <input id="psw-repeat" type="password" placeholder="Repeat Password" name="psw-repeat" required>
+            <label for="first-name"><b>first name</b></label>
+            <input id="first-name" type="text" placeholder="first name" name="first-name"  required>
+            <label for="family-name"><b>family name</b></label>
+            <input id="family-name" type="text" placeholder="family name" name="family-name"  required>
+            <label for="email"><b>Email</b></label>
+            <input type="text" placeholder="Enter Email" name="email" id="email" required>
+            <label for="birthday"><b>Birthday:</b></label>
+            <input type="date" id="birthday" name="birthday" required>
+            <input id = "sign_up" onclick ="sign_up_check()" type = "button" value = "sign up">
+          </div>
+    </section>
+
+
+   </body>
+</center>
+</html>

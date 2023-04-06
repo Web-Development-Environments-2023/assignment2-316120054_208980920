@@ -67,6 +67,6 @@ function back_to_welcome(){
     document.getElementById("sign-in").style.display="none";
     document.getElementById("sign-up").style.display="none";
 }
-function start{
+function start(){
     game_started = true;
 }

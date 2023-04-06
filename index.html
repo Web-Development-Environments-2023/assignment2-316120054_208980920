@@ -1,57 +1,82 @@
 <!DOCTYPE html>
 
-<!-- Fig. 14.26: cannon.html -->
-<!-- Cannon Game HTML5 document. -->
-<html>
-<center>
+<html lang="sonarlint">
+
    <head>
       <meta charset = "utf-8">
       <title>Starship Game</title>
-      <style type = "text/css">
-      </style>
+      <link rel="stylesheet" type="text/css" href="style.css" />
 	   <script src = "starships.js"></script>
    </head>
    <body>
+    <div class="bar-container">
+      <nav id="menu">
+      <ul>
+      <li><a href="#" >About</a> </li>
+      </ul>
+      </nav>
+      </div>
     <section id="welcome_page">
-        IDS:</br>
+      
+      <h1>Starship Game</h1>
+      <h2>Please sign in or sign up</h2>
+      <p>
+        Creators:</br>
         Tal Abraham: 208980920</br>
         Roi Hass: 316120054</br>
-        
-      <p><input id = "sign_in_click" onclick ="sign_in_click()" type = "button" value = "sign in">
       </p>
-      <p><input id = "sign_up_click" onclick ="sign_up_click()" type = "button" value = "sign up">
+        
+      <input class = "button" id = "sign_in_click" onclick ="sign_in_click()" type = "button" value = "sign in">
+      <input class = "button" id = "sign_up_click" onclick ="sign_up_click()" type = "button" value = "sign up">
       </section>
+
     <section id="sign-in" style="display: none;">
         <div class="container">
-            <label for="uname"><b>Username</b></label>
-            <input id="username" type="text" placeholder="Enter Username" name="uname" required>
+          <form class="form">
+            <label class="label" for="uname"><b>Username:</b></label>
+            <input class="text" id="username1" type="text" placeholder="Enter Username" name="uname" required><br>
         
-            <label for="psw"><b>Password</b></label>
-            <input id="password" type="password" placeholder="Enter Password" name="psw" required>
-            <input id = "sign_in" onclick ="sign_in_check()" type = "button" value = "sign in">
+            <label class="label" for="psw"><b>Password:</b></label>
+            <input class="text" id="password-in" type="password" placeholder="Enter Password" name="psw" required><br>
+          </form>
+            <input class = "button" id = "sign_in" onclick ="sign_in_check()" type = "button" value = "sign in"><br>
+            <input class = "button" id="back_btn" type="button" value="Back" onclick = "back_to_welcome()">
+          
           </div>
     </section>
     <section id="sign-up" style="display: none;">
         <div class="signup">
-            <label for="uname"><b>Username</b></label>
-            <input id="username" type="text" placeholder="Enter Username" name="uname" required>
-            <label for="psw"><b>Password</b></label>
-            <input id="password" type="password" placeholder="Enter Password" name="psw" id="psw" required>
-            <label for="psw-repeat"><b>Repeat Password</b></label>
-            <input id="psw-repeat" type="password" placeholder="Repeat Password" name="psw-repeat" required>
-            <label for="first-name"><b>first name</b></label>
-            <input id="first-name" type="text" placeholder="first name" name="first-name"  required>
-            <label for="family-name"><b>family name</b></label>
-            <input id="family-name" type="text" placeholder="family name" name="family-name"  required>
-            <label for="email"><b>Email</b></label>
-            <input type="text" placeholder="Enter Email" name="email" id="email" required>
-            <label for="birthday"><b>Birthday:</b></label>
-            <input type="date" id="birthday" name="birthday" required>
-            <input id = "sign_up" onclick ="sign_up_check()" type = "button" value = "sign up">
+          <form class="form">
+            <label class="label" for="uname"><b>Username:</b></label>
+            <input class="text" id="username2" type="text" placeholder="Enter Username" name="uname" required><br>
+            <label class="label" for="psw"><b>Password:</b></label>
+            <input class="text" id="password-up" type="password" placeholder="Enter Password" name="psw" id="psw" required><br>
+            <label class="label" for="psw-repeat"><b>Repeat Password:</b></label>
+            <input class="text" id="psw-repeat" type="password" placeholder="Repeat Password" name="psw-repeat" required><br>
+            <label class="label" for="first-name"><b>First name:</b></label>
+            <input class="text" id="first-name" type="text" placeholder="first name" name="first-name"  required><br>
+            <label class="label" for="family-name"><b>Last name:</b></label>
+            <input class="text" id="family-name" type="text" placeholder="Last name" name="family-name"  required><br>
+            <label class="label" for="email"><b>Email:</b></label>
+            <input class="text" type="email" placeholder="Enter Email" name="email" id="email" required><br>
+            <label class="label" for="birthday"><b>Birthday:</b></label>
+            <input type="date" id="birthday" name="birthday"><br>
+          </form>
+            <input class = "button" id = "sign_up" onclick ="sign_up_check()" type = "button" value = "sign up">
+            <input class = "button" id="back_btn" type="button" value="Back" onclick = "back_to_welcome()">
+          
           </div>
     </section>
+    <section id="game" style="display: none;">
+      <div>
+        <canvas class="canvas" id="canvas" width="1000" height="700"></canvas>
+      </div>
+      <div>
+        <input class = "button" id = "start" onclick ="start()" type = "button" value = "start">
+      </div>
 
+    </section>
 
    </body>
-</center>
+
 </html>

@@ -71,12 +71,18 @@
       <div>
         <canvas class="canvas" id="canvas" width="1000" height="700"></canvas>
       </div>
+     
       <div>
         <input class = "button" id = "start" onclick ="setupGame()" type = "button" value = "start">
       </div>
 
     </section>
+    <section id = "after_game" style="display: none;">
+      <input class = "button" id = "StartNewGame" onclick ="restart()" type = "button" value = "start new game">
+      <input class = "button" id = "logout" onclick ="back_to_welcome()" type = "button" value = "log out">
+    </section>
 
+    
    </body>
 
 </html>

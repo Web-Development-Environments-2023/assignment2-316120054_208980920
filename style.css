@@ -133,5 +133,23 @@ h1{
     margin-left: 15vw;
     padding: 10px;
   }
+
+  #StartNewGame{
+    bottom: 10px;
+    position:absolute;
+    margin-left: -300px;
+    margin-right: -100px;
+    float:left;
+   
+  }
+  #logout{
+
+    /* margin-right: 100px; */
+    margin-left: 0;
+    margin-right: -100px;
+    bottom: 10px;
+    position:absolute;
+
+  }
   
   

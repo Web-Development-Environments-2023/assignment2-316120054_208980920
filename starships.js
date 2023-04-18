@@ -4,9 +4,14 @@ var currnet_user = null;
 var records = {};//{user_name:score}
 var score = 0;
 var TIME_INTERVAL = 100;
-var INITIAL_GAME_TIME = 120;
+var INITIAL_GAME_TIME = 10;
+var Myradius = 30;
+var startTime;
+var time_elapes = 0;
+var counter_update_speed=0;
 var game_started = false;
 var lineWidth;
+var liveRemaining =3;
 var ROWS = 4
 var timeLeft;
 var target1;
@@ -33,14 +38,24 @@ var SHOT=32;
 var myShot;
 var SHOT_RADIUS = 10;
 var cannonballOnScreen=false;
+var points=0;
+var enemiesVelocity;
+var radius = 20;
+var enemyShots;
+var enemieskilled=0;
+var record_history;
+var shot_interval;
+var speed_enemies_interval;
 
 var TARGET_PIECES = ROWS * COLUMN;//number of enemy ships
 
 // function that is called when the user click on the sign in button
 function sign_in_click() {
-
+    document.getElementById("after_game").style.display = "none";
     document.getElementById("welcome_page").style.display = "none";
     document.getElementById("sign-in").style.display = "block";
+
+
 }
 // function that is called when the user click on the sign up button
 function sign_up_click() {
@@ -56,6 +71,12 @@ function sign_in_check() {
     if (my_password == password) {
         currnet_user = user_name;
         document.getElementById("sign-in").style.display = "none";
+        record_history=new Object();
+        record_history.name= user_name;
+        record_history.records=[];
+        var canvas = document.getElementById("canvas");
+        ctx=canvas.getContext('2d');
+        ctx.clearRect(0,0,canvas.width,canvas.height);
         start();//move to the game
     }
     else {
@@ -68,7 +89,6 @@ function sign_up_check() {
     var user_name = document.getElementById("username2").value;
     var password = document.getElementById("password-up").value;
     var confirm_password = document.getElementById("psw-repeat").value;
-    console.log(user_name, password, confirm_password)
     var email = document.getElementById("email").value;
     const email_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -80,6 +100,9 @@ function sign_up_check() {
                 } else {
                     users[user_name] = password;
                     document.getElementById("sign-up").style.display = "none";
+                    record_history=new Object();
+                    record_history.name= user_name;
+                    record_history.records=[];
                     start();//move to the game
                 }
             }
@@ -99,47 +122,47 @@ function back_to_welcome() {
     document.getElementById("welcome_page").style.display = "block";
     document.getElementById("sign-in").style.display = "none";
     document.getElementById("sign-up").style.display = "none";
+    document.getElementById("after_game").style.display = "none";
+
+}
+function restart(){
+    context.clearRect(0,0,canvas.width,canvas.height); 
+    document.getElementById("after_game").style.display = "none";
+    const button = document.getElementById("start");
+    button.value = "Start";
+    start();
 }
 function start() {
-    game_started = true;
     document.getElementById("game").style.display = "block";
-
+ // setupGame();
+    // newGame();
 }
 function setupGame() {
+    
     document.getElementById("canvas").style.display = "block";
-
+    // const button = document.getElementById("start");
+    // button.value = "Restart";
     // stop timer if document unload event occurs
     //    document.addEventListener("unload", stopTimer, false );
 
     // get the canvas, its context and setup its click event handler
     canvas = document.getElementById("canvas");
     context = canvas.getContext("2d");
-
     // start a new game when user clicks Start Game button
     document.getElementById("start").addEventListener(
         "click", newGame, false);
 
     // JavaScript Object representing game items
-    target1 = new Object(); // object representing target line
-    target1.start = new Object(); // will hold x-y coords of line start
-    target1.end = new Object(); // will hold x-y coords of line end
-    target2 = new Object(); // object representing target line
-    target2.start = new Object(); // will hold x-y coords of line start
-    target2.end = new Object(); // will hold x-y coords of line end
-    target3 = new Object(); // object representing target line
-    target3.start = new Object(); // will hold x-y coords of line start
-    target3.end = new Object(); // will hold x-y coords of line end
-    target4 = new Object(); // object representing target line
-    target4.start = new Object(); // will hold x-y coords of line start
-    target4.end = new Object(); // will hold x-y coords of line end
     shipball = new Object(); // object representing cannonball point
     barrelEnd = new Object(); // object representing end of cannon barrel
     ship = new Object();
     myShot=new Object();
-    const randomX = Math.floor(Math.random() * (canvas.width-60));
-    const centerY = canvas.height - 40;
-    ship.x = randomX;
-    ship.y = centerY;
+    enemyShots = [];
+    startTime = new Date();
+    enemiesVelocity=10;
+    direct = "left";
+    generate_ship_location();
+
     // initialize hitStates as an array
     hitStates = new Array(ROWS);
     for (var i = 0; i < hitStates.length; i++) {
@@ -157,7 +180,21 @@ function setupGame() {
     // interval=setInterval(UpdatePosition, TIME_INTERVAL);
 } // end function setupGame
 
-
+function generate_ship_location(){
+    var randomX = Math.floor(Math.random() * (canvas.width-60));
+    const centerY = canvas.height - 40;
+    if(randomX<40){
+        randomX=40;
+    }
+    ship.x = randomX;
+    ship.y = centerY;
+}
+function update_speed(){
+    if(counter_update_speed<4){
+    enemiesVelocity=enemiesVelocity*1.5;
+    counter_update_speed++;
+    }
+}
 function GetKeyPressed() {
     if (keysDown[38]) {
         return 1;
@@ -191,15 +228,24 @@ function startTimer() {
 
 // terminate interval timer
 function stopTimer() {
-    canvas.removeEventListener("keyup", function(event){if (event.key === 'Space'){
-        ShipShot();
-    }}, false);
+    // canvas.removeEventListener("keyup", function(event){if (event.key === 'Space'){
+    //     ShipShot();
+    // }}, false);
     window.clearInterval(intervalTimer);
+    window.clearInterval(shot_interval);
+    window.clearInterval(speed_enemies_interval);
+
 } // end function stopTimer
 
 // called by function newGame to scale the size of the game elements
 // relative to the size of the canvas before the game begins
 function resetElements() {
+    startTime = new Date();
+    liveRemaining=3;
+    points=0;
+    enemiesVelocity=10;
+    counter_update_speed=0;
+    cannonballOnScreen=false;
     var w = canvas.width;
     var h = canvas.height;
     canvasWidth = w; // store the width
@@ -216,10 +262,7 @@ function resetElements() {
     targetEnd = h * 7 / 8; // distance from top 7/8 canvas height
     pieceLength = (targetEnd - targetBeginning) / TARGET_PIECES;
     initialTargetVelocity = -h / 4; // initial target speed multiplier
-    target1.start.x = targetDistance;
-    target1.start.y = targetBeginning;
-    target1.end.x = targetDistance;
-    target1.end.y = targetEnd;
+
 
     // end point of the cannon's barrel initially points horizontally
     barrelEnd.x = cannonLength;
@@ -227,18 +270,27 @@ function resetElements() {
 } // end function resetElements
 
 function newGame() {
+    
     resetElements(); // reinitialize all game elements
-    //    stopTimer(); // terminate previous interval timer
+     stopTimer(); // terminate previous interval timer
+    speed_enemies_interval=setInterval(update_speed, 5000);
+    shot_interval = setInterval(updateShot,100);
+    const spacing = 40;
+    const startX = (canvas.width - (COLUMN * (2 * radius + spacing))) / 2;
+    const startY = 50;
 
     // set every element of hitStates to false--restores target pieces
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLUMN; j++) {
+            const x = startX + radius + j * (2 * radius + spacing);
+            const y = startY + radius + i * (2 * radius + spacing);
             hitStates[i][j] = new Object();
             hitStates[i][j].hit = false; // target piece not destroyed
-            // hitStates[i][j].x=null;
-            // hitStates[i][j].y=null;
+            hitStates[i][j].x=x;
+            hitStates[i][j].y=y;
         }
     }
+    enemyShoot();
     draw();
 
     targetPiecesHit = 0; // no target pieces have been hit
@@ -248,9 +300,10 @@ function newGame() {
     enemyballOnScreen = false; // the enemyball is not on the screen
     shotsFired = 0; // set the initial number of shots fired
     timeElapsed = 0; // set the time elapsed to zero
-    startTimer()
+    startTimer();
         // startTimer(); // starts the game loop
 } // end function newGame
+
 function draw(){
     canvas.width = canvas.width; // clears the canvas (from W3C docs)
     if (cannonballOnScreen) {
@@ -267,30 +320,34 @@ function draw(){
    context.fillStyle = "black";
    context.font = "bold 24px serif";
    context.textBaseline = "top";
-   context.fillText("Time remaining: " + timeLeft, 5, 5);
+   var time_remained = (INITIAL_GAME_TIME- time_elapes).toFixed(0);
+   if(time_remained<0){
+        time_remained=0;
+   }
+   context.fillText("Time remaining: " + time_remained, 5, 5);
+
+      // display points 
+    context.fillText("Score: " + points, 5, 25);
+
+    // display live
+    context.fillText('Lives: '+ liveRemaining,300,5)
+// display enemy shots
+    drawShots();
 
 
-   const Myradius = 30;
    context.beginPath();
    context.arc( ship.x,  ship.y, Myradius, 0, 2 * Math.PI);
    context.fillStyle = 'grey';
    context.fill();
 
-const radius = 20;
-const spacing = 40;
-const startX = (canvas.width - (COLUMN * (2 * radius + spacing))) / 2;
-const startY = 50;
-
+    const button = document.getElementById("start");
+    button.value = "Restart";
 for (let i = 0; i < ROWS; i++) {
   for (let j = 0; j < COLUMN; j++) {
     if(!hitStates[i][j].hit){
-    
-    const x = startX + radius + j * (2 * radius + spacing);
-    const y = startY + radius + i * (2 * radius + spacing);
-    context.beginPath();
-    context.arc(x, y, radius, 0, 2 * Math.PI);
-    hitStates[i][j].x=x;
-    hitStates[i][j].y=y;
+        context.beginPath();
+    context.arc(hitStates[i][j].x,hitStates[i][j].y, radius, 0, 2 * Math.PI);
+
     if(i===0)
         context.fillStyle = 'blue';
     if(i===1)
@@ -303,10 +360,147 @@ for (let i = 0; i < ROWS; i++) {
   }
 }
 }
+}
+function updateLeaderboard() {
+    // assume scores and names are retrieved from a database or other data source
+    try{
+
+        const container = document.querySelector('#after_game');
+        const table = container.querySelector('table');
+        table.remove();
+    }
+    catch{
+
+    }
+    let table = document.createElement('table');
+    table.style.margin = 'auto';
+    table.style.borderCollapse='collapse';
+    table.style.border = '2px solid black';
+    table.style.fontSize = '32px';
+    table.style.width = '60%';
+    table.style.height = '300px';
+    table.style.color = 'black';
+    let headerRow = document.createElement('thead');
+    let headerCells = ['Index', 'Score'];
+    // Create header cells and add them to the header row
+    for (let i = 0; i < headerCells.length; i++) {
+      let cell = document.createElement('th');
+    //   cell.style.fontWeight = 'bold';
+    //   cell.style.textDecoration = 'underline';
+      cell.style.borderBottom = '5px solid ';
+
+      cell.innerHTML = headerCells[i];
+      headerRow.appendChild(cell);
+    }
+    table.appendChild(headerRow);
+
+    // Add the header row to the table
+    let dataRows = record_history.records;
+    dataRows.sort(function(a, b) {
+        return b-a;
+      });
+    for (let i = 0; i < dataRows.length; i++) {
+      let row = document.createElement('tr');
+      row.style.borderTop = '2px solid';
+
+      let cell1 = document.createElement('td');
+      cell1.innerHTML = dataRows[i].toString();
+      let cell2 = document.createElement('td');
+      cell2.innerHTML =(i+1).toString();
+      row.appendChild(cell2);
+      row.appendChild(cell1);
+      table.appendChild(row);
+    }
+    
+    let container = document.querySelector('#after_game');
+    container.appendChild(table);
 
 }
+
+
+function updateShot(){
+    for(var i=0;i<enemyShots.length;i++){
+        var interval = 100 /1000.0;
+        enemyShots[i].y += 40;
+        if(enemyShots[i].y + radius >= canvas.height){
+            enemyShots.splice(i,1);
+        }
+        if(enemyShots[i].y>=canvas.height*(3/4)){
+            enemyShoot();
+        }
+        if(enemyShots[i].x>=ship.x-Myradius && enemyShots[i].x<=ship.x+Myradius
+            && enemyShots[i].y>=ship.y-Myradius && enemyShots[i].y<=ship.y+Myradius){
+                enemyShots.splice(i,1);
+                liveRemaining--;
+                generate_ship_location();
+                
+        }
+    
+    }
+}
+function drawShots(){
+        // draw enemy Shoot
+        for (var i=0;i<enemyShots.length;i++){
+            
+            context.fillStyle = "black";
+            context.beginPath();
+            context.arc(enemyShots[i].x, enemyShots[i].y, SHOT_RADIUS, 0, Math.PI *2);
+            context.fill();
+            
+        }
+}
+function enemyShoot(){
+    
+    var randomRow = Math.floor(Math.random() *(ROWS));
+    var randomColumn =Math.floor(Math.random() *(COLUMN-1));
+    while(hitStates[randomRow][randomColumn].hit){
+        randomRow = Math.floor(Math.random() *ROWS);
+        randomColumn =Math.floor(Math.random() *COLUMN);
+    }
+    var shot = {x:hitStates[randomRow][randomColumn].x, y:hitStates[randomRow][randomColumn].y}
+    if(enemyShots.length < 2)
+        enemyShots.push(shot)
+
+
+}
+function display_records(message){
+
+    var str="your records" +"\n" + record_history.name +"-\n";
+    for (var i=0; i<record_history.records.length;i++){
+        str+=record_history.records[i]+"\n";
+    }
+    alert(message +"\n" + str);
+    document.getElementById("game").style.display = "none";
+    document.getElementById("after_game").style.display = "block";
+    updateLeaderboard();
+    resetElements();
+}
 function UpdatePosition() {
-    var x = GetKeyPressed()
+    var x = GetKeyPressed();
+    if(liveRemaining==0){
+        stopTimer();
+        record_history.records.push(points);
+        display_records("You Lost");
+    }
+    if(points==250){
+        stopTimer();
+        record_history.records.push(points);
+        display_records("Champion!");
+        
+    }
+    if(INITIAL_GAME_TIME-time_elapes<=0.5){
+        if(points<100){
+            record_history.records.push(points);
+            stopTimer();
+            display_records("you can do better");
+            
+        }
+        else{
+            record_history.records.push(points);
+            stopTimer();
+            display_records("winner");
+        }
+    }
     if(x==1)//up
     {
         if(ship.y>=520)
@@ -341,16 +535,33 @@ function UpdatePosition() {
             ship.x=960;
         }
     }
-    if(x==5){
+    if(x==5){//space
         if(!cannonballOnScreen){
             ShipShot(); 
+            
+        }  
+
+    }
+        for(var i=0;i<ROWS;i++){
+            for(var j=0;j<COLUMN;j++){
+                hitStates[i][j].x += enemiesVelocity;
+                if(!hitStates[i][j].hit){
+                if(hitStates[i][j].x+radius>canvas.width){
+                    hitStates[i][j].x=970;
+                    enemiesVelocity*=-1;
+                    updateEnemyPosition("right");
+                }
+                if(hitStates[i][j].x<radius){
+                    hitStates[i][j].x=30;
+                    enemiesVelocity*=-1;
+                    updateEnemyPosition("left");
+                }
+            }
+            }
         }
-
-     
-       
-
-    }//Myship shooting
-
+    
+    var nowTime = new Date();
+    time_elapes = (nowTime-startTime)/1000;    
     var to_brake=false;
     if(cannonballOnScreen){
         var interval = TIME_INTERVAL /1000.0;
@@ -361,6 +572,8 @@ function UpdatePosition() {
                     if(myShot.x >= hitStates[i][j].x-20 && myShot.x <= hitStates[i][j].x+20 && 
                         myShot.y >= hitStates[i][j].y-20 && myShot.y <= hitStates[i][j].y+20 ){
                             hitStates[i][j].hit=true;
+                            enemieskilled++;
+                            points+=20-i*5;
                             cannonballOnScreen=false;
                             break;
                             to_brake=true;
@@ -377,9 +590,35 @@ function UpdatePosition() {
         {
             cannonballOnScreen = false;
         }  
-    
+
+  
+
     
     draw();    
+}
+function updateEnemyPosition(direction){
+    var gap=80;
+    if(direction==="right"){
+       
+        for (let i = ROWS-1; i >=0; i--) {
+         for (let j = COLUMN-2; j >= 0; j--) {
+            if(!hitStates[i][j].hit){
+             hitStates[i][j].x=hitStates[i][j+1].x-gap;
+            }
+         }
+     }
+    }
+    else{
+        for (let i = 0; i <ROWS; i++) {
+         for (let j = 2; j <COLUMN; j++) {
+            if(!hitStates[i][j].hit){
+             hitStates[i][j-1].x=hitStates[i][j].x-gap;
+            }
+         }
+
+    }
+}
+
 }
 function ShipShot(){
     // if (cannonballOnScreen) // if a cannonball is already on the screen
@@ -400,8 +639,6 @@ function ShipShot(){
 //  cannonSound.play();
 }
 
-
 window.addEventListener("load", setupGame, false);
+
 // window.addEventListener("keydown", UpdatePosition, false);
-
-

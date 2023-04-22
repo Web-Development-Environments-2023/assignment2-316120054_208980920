@@ -87,8 +87,16 @@ h1{
     color: white;
     transition: background-color 1s ease-in-out;
     transition: color 1s ease-in-out;
+    text-align: center;
 }
-
+h2{
+    font-size: 30px;
+    font-family:Arial, Helvetica, sans-serif;
+    color: white;
+    transition: background-color 1s ease-in-out;
+    transition: color 1s ease-in-out;
+    text-align: center;
+}
 .form{
     text-align: left;
     font-family:Arial, Helvetica, sans-serif;
@@ -106,6 +114,7 @@ h1{
     transition: background-color 1s ease-in-out;
     transition: color 1s ease-in-out;
     padding: 15px;
+    
 }
 .text{
     border: 0;
@@ -128,28 +137,117 @@ h1{
     box-sizing: border-box;
     border-radius: 25px;
   }
+  /* #canvasGame{
+    margin:auto;
+    width: 50vw;
+    height: 70vh;
+  } */
   .canvas{
-    margin: 10px;
-    margin-left: 15vw;
+    margin: auto;
     padding: 10px;
+    width: 50vw;
+    height: 75vh;
   }
-
+  #bottonGame{
+    position: absolute;
+    bottom: 3vh;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+  }
   #StartNewGame{
+    margin-left: -5vh;
+  }
+  #logout{
+    margin: 0 20px;
+
+  }
+   /* #StartNewGame{
     bottom: 10px;
     position:absolute;
     margin-left: -300px;
     margin-right: -100px;
     float:left;
    
-  }
-  #logout{
+  }  */
+  /* #logout{ */
 
     /* margin-right: 100px; */
-    margin-left: 0;
+    /* margin-left: 0;
     margin-right: -100px;
     bottom: 10px;
     position:absolute;
 
+  } */ 
+  .footer{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 30px;
+    background-color: rgba(0, 119, 190, 0.5 );
+    color: white;
+    text-align: center;
+    font-family:Arial, Helvetica, sans-serif;
+    transition: background-color 1s ease-in-out;
+    transition: color 1s ease-in-out;
   }
-  
-  
+  .footer p{
+    margin: 0;
+    padding: 0;
+    line-height: 30px;
+  }
+  #aboutBtn{
+    background-color: rgba(0, 0, 0, 0 );
+    color: white;
+    border: none;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 16px;
+  }
+  #aboutBtn:hover{
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  #aboutDialog{
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+  }
+ #aboutDialog button{
+    background-color: rgba(0, 0, 0, 0 );
+    color: white;
+    border: none;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-image: url('x.png');
+   ;
+  }
+  #aboutDialog button:hover{
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  #aboutDialog p{
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 16px;
+  }
+  #configDiv{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    padding: 10px;
+    width: 50vw;
+    height: 75vh;
+    text-align: center;
+  }
+  #configDiv p{
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 16px;
+  }
+ 
+ 

@@ -9,24 +9,42 @@
 	   <script src = "starships.js"></script>
    </head>
    <body>
+    <audio id="game_music" src="game_music.mp3" loop="true" autoplay="false"></audio>
+    <audio id="hitted_by_enemy" src="hitted_by_enemy.mp3" preload="auto" autoplay="false"></audio>
+    <audio id="shipshot" src="shipshot.mp3" autoplay="false" preload="auto"></audio>
+    <audio id="youLostMusic" src="youLostMusic.mp3" autoplay="false" preload="auto"></audio>
+    <audio id="youWonMusic" src="winningMusic.mp3" autoplay="false" preload="auto"></audio>
     <div class="bar-container">
       <nav id="menu">
       <ul>
-      <li><a href="#" >About</a> </li>
+      <li><button id="aboutBtn" onclick="openDialog()">About</button></li>
+      <li><a href="#" onclick="back_to_welcome()" >Log Out</a> </li>
       </ul>
       </nav>
       </div>
+      <dialog id="aboutDialog">
+        <div id="aboutDialogDiv"> 
+        <h1>About The Game</h1>
+        <p>Hello everyone!<br/>
+        <li>This is a game about a starship that is trying to kill all the bad enemies</li>
+        <li>The starship is controlled by the arrow keys</li>
+        <li>The goal is to get to the end of the game by killing all the enemies</li>
+        <li>The enemies are trying to kill the starship</li>
+        <li>The starship can shoot bullets to kill the enemies</li>
+        <li>You can choose a button to shoot the enemies at the configuration window</li>
+        <li>You can choose also the duration of the game at the configuration window</li>
+        <li>We hope you will enjoy the game</li>
+      </p>
+        <button id="closeBtn" onclick="closeDialog()">X</button>
+      </div>
+      </dialog>
     <section id="welcome_page">
       
       <h1>Starship Game</h1>
       <h2>Please sign in or sign up</h2>
-      <p>
-        Creators:</br>
-        Tal Abraham: 208980920</br>
-        Roi Hass: 316120054</br>
-      </p>
+     
         
-      <input class = "button" id = "sign_in_click" onclick ="sign_in_click()" type = "button" value = "sign in">
+      <input class = "button" id = "sign_in_page" onclick ="sign_in_page()" type = "button" value = "sign in">
       <input class = "button" id = "sign_up_click" onclick ="sign_up_click()" type = "button" value = "sign up">
       </section>
 
@@ -67,9 +85,20 @@
           
           </div>
     </section>
+    <div id="configDiv" style="display: none;">
+      <h2>Game Configuration</h2>
+      <label class="label" for="shootBtn">Shoot Button:</label>
+      <input class="text" type="text" id="shootKey"  placeholder="'Space as default'" maxlength="1" required><br/>
+      <br>
+      <label class="label"  for="duration">Game Duration:</label>
+      <input class="text" type="number" id="duration" min="1" max="10" value="2" maxlength="1"><br/>
+      
+      <br>
+      <button class="button" onclick="setupGame()">Apply Configuration</button>
+    </div>
     <section id="game" style="display: none;">
-      <div>
-        <canvas class="canvas" id="canvas" width="1000" height="700"></canvas>
+      <div id="canvasGame">
+        <canvas class="canvas" id="canvas" height="700" width="1000"></canvas>
       </div>
      
       <div>
@@ -78,10 +107,14 @@
 
     </section>
     <section id = "after_game" style="display: none;">
+      <div id="bottonGame">
       <input class = "button" id = "StartNewGame" onclick ="restart()" type = "button" value = "start new game">
-      <input class = "button" id = "logout" onclick ="back_to_welcome()" type = "button" value = "log out">
+      
+    </div>
     </section>
-
+    <footer class="footer">
+     <p> © 2023 Tal Abraham: 208980920  & Roi Hass: 316120054 </p>
+    </footer>
     
    </body>
 

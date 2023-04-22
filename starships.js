@@ -5,6 +5,7 @@ var records = {};//{user_name:score}
 var score = 0;
 var TIME_INTERVAL = 100;
 var INITIAL_GAME_TIME = 10;
+var shootBtn= 32;
 var Myradius = 30;
 var startTime;
 var time_elapes = 0;
@@ -46,22 +47,45 @@ var enemieskilled=0;
 var record_history;
 var shot_interval;
 var speed_enemies_interval;
+    // get sounds
+var ShipShotSound;
+
+var HittedByEnemy;
+
+var GameMusic;
+var youLostMusic;
+var youWonMusic;
+var shipImg;
 
 var TARGET_PIECES = ROWS * COLUMN;//number of enemy ships
 
+function openDialog() {
+    var dialog = document.getElementById("aboutDialog");
+    dialog.showModal();
+  }
+  
+  function closeDialog() {
+    var dialog = document.getElementById("aboutDialog");
+    dialog.close();
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const aboutDialog = document.querySelector('#aboutDialog');
+  
+    aboutDialog.addEventListener('click', (event) => {
+      if (event.target === aboutDialog) {
+        closeDialog();
+      }
+    });
+});
+
+    
+
 // function that is called when the user click on the sign in button
-function sign_in_click() {
-    document.getElementById("after_game").style.display = "none";
+function sign_in_page() {
+    // document.getElementById("after_game").style.display = "none";
     document.getElementById("welcome_page").style.display = "none";
     document.getElementById("sign-in").style.display = "block";
 
-
-}
-// function that is called when the user click on the sign up button
-function sign_up_click() {
-    var x = document.getElementById("welcome_page");
-    x.style.display = "none";
-    document.getElementById("sign-up").style.display = "block";
 }
 // checking if the user name and password are correct
 function sign_in_check() {
@@ -74,15 +98,40 @@ function sign_in_check() {
         record_history=new Object();
         record_history.name= user_name;
         record_history.records=[];
-        var canvas = document.getElementById("canvas");
-        ctx=canvas.getContext('2d');
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        start();//move to the game
+        document.getElementById("configDiv").style.display = "block";
+        applyConfig();
+       
     }
     else {
         alert("wrong user name or password");
+        document.getElementById("username1").value = "";
+        document.getElementById("password-in").value  = "";
+ 
     }
 }
+function applyConfig() {
+
+    const shootKey = document.querySelector('#shootKey');
+    shootKey.addEventListener('keydown', (event) => {
+        if(event.keyCode == 32){
+            shootKey.value = 'Space';
+            shootBtn = 32;
+        }
+        else{
+            shootKey.value = event.key; 
+            shootBtn = event.keyCode;
+        }
+    });
+    INITIAL_GAME_TIME = parseInt(document.querySelector('#duration').value) * 60;
+  }
+// function that is called when the user click on the sign up button
+function sign_up_click() {
+    var x = document.getElementById("welcome_page");
+    x.style.display = "none";
+    document.getElementById("sign-up").style.display = "block";
+}
+
+
 // checking if the user name is already exists and if not, add it to the users dictionary
 function sign_up_check() {
     const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
@@ -103,7 +152,9 @@ function sign_up_check() {
                     record_history=new Object();
                     record_history.name= user_name;
                     record_history.records=[];
-                    start();//move to the game
+                    //start();//move to the game
+                    document.getElementById("configDiv").style.display = "block";
+                    applyConfig();
                 }
             }
             else {
@@ -119,32 +170,46 @@ function sign_up_check() {
 }
 // function that is called when the user click on back button
 function back_to_welcome() {
+    GameMusic.pause();
+    GameMusic.currentTime = 0;
     document.getElementById("welcome_page").style.display = "block";
     document.getElementById("sign-in").style.display = "none";
     document.getElementById("sign-up").style.display = "none";
     document.getElementById("after_game").style.display = "none";
-
+    document.getElementById("game").style.display = "none";
+    document.getElementById("canvas").style.display = "none";
+    const button = document.getElementById("start");
+    button.value = "Start";
+    resetElements();
+    stopTimer()
+    
 }
+
+  
+
+  
 function restart(){
     context.clearRect(0,0,canvas.width,canvas.height); 
     document.getElementById("after_game").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    document.getElementById("canvas").style.display = "block";
     const button = document.getElementById("start");
     button.value = "Start";
     start();
 }
 function start() {
-    document.getElementById("game").style.display = "block";
+    document.getElementById("configuration").style.display = "block";
  // setupGame();
     // newGame();
 }
 function setupGame() {
-    
-    document.getElementById("canvas").style.display = "block";
-    // const button = document.getElementById("start");
-    // button.value = "Restart";
-    // stop timer if document unload event occurs
-    //    document.addEventListener("unload", stopTimer, false );
 
+    document.getElementById("configDiv").style.display = "none";
+    document.getElementById("canvas").style.display = "block";
+    document.getElementById("game").style.display = "block";
+    
+    shipImg = new Image();
+    shipImg.src = "ShipPicture.png";
     // get the canvas, its context and setup its click event handler
     canvas = document.getElementById("canvas");
     context = canvas.getContext("2d");
@@ -159,7 +224,7 @@ function setupGame() {
     myShot=new Object();
     enemyShots = [];
     startTime = new Date();
-    enemiesVelocity=10;
+    enemiesVelocity = 10;
     direct = "left";
     generate_ship_location();
 
@@ -168,17 +233,50 @@ function setupGame() {
     for (var i = 0; i < hitStates.length; i++) {
         hitStates[i] = new Array(COLUMN);
     }
+    ShipShotSound = document.getElementById("shipshot");
 
+    HittedByEnemy = document.getElementById("hitted_by_enemy");
 
-    // get sounds
-    targetSound = document.getElementById("targetSound");
-    ship_gun_sound = document.getElementById("ship_gun_sound");
-    enemy_gun_sound = document.getElementById("enemy_gun_sound");
-
-    
-
+    GameMusic = document.getElementById("game_music");
+    youLostMusic = document.getElementById("youLostMusic");
+    youWonMusic = document.getElementById("youWonMusic");
     // interval=setInterval(UpdatePosition, TIME_INTERVAL);
 } // end function setupGame
+function newGame() {
+
+    resetElements(); // reinitialize all game elements
+    stopTimer(); // terminate previous interval timer
+    speed_enemies_interval = setInterval(update_speed, 5000);
+    shot_interval = setInterval(updateShot,100);
+    const spacing = 40;
+    const startX = (canvas.width - (COLUMN * (2 * radius + spacing))) / 2;
+    const startY = 50;
+    GameMusic.play();
+    // set every element of hitStates to false--restores target pieces
+    for (var i = 0; i < ROWS; i++) {
+        for (var j = 0; j < COLUMN; j++) {
+            const x = startX + radius + j * (2 * radius + spacing);
+            const y = startY + radius + i * (2 * radius + spacing);
+            hitStates[i][j] = new Object();
+            hitStates[i][j].hit = false; // target piece not destroyed
+            hitStates[i][j].x=x;
+            hitStates[i][j].y=y;
+        }
+    }
+    enemyShoot();
+    draw();
+
+    targetPiecesHit = 0; // no target pieces have been hit
+    targetVelocity = initialTargetVelocity; // set initial velocity
+    timeLeft = INITIAL_GAME_TIME; // start the countdown at 10 seconds
+    timerCount = 0; // the timer has fired 0 times so far
+    enemyballOnScreen = false; // the enemyball is not on the screen
+    shotsFired = 0; // set the initial number of shots fired
+    timeElapsed = 0; // set the time elapsed to zero
+    startTimer();
+    
+        // startTimer(); // starts the game loop
+} // end function newGame
 
 function generate_ship_location(){
     var randomX = Math.floor(Math.random() * (canvas.width-60));
@@ -208,12 +306,11 @@ function GetKeyPressed() {
     if (keysDown[39]) { 
         return 4;
     }
-    if(keysDown[32]){
+    if(keysDown[shootBtn]){
         return 5;
     }
 }
 function startTimer() {
-    
     intervalTimer = window.setInterval(UpdatePosition, TIME_INTERVAL);
     keysDown = {};
     addEventListener("keydown", function (e) {
@@ -235,16 +332,18 @@ function stopTimer() {
     window.clearInterval(shot_interval);
     window.clearInterval(speed_enemies_interval);
 
+
 } // end function stopTimer
 
 // called by function newGame to scale the size of the game elements
 // relative to the size of the canvas before the game begins
 function resetElements() {
+    context.clearRect(0,0,canvas.width,canvas.height); // clear canvas
     startTime = new Date();
-    liveRemaining=3;
-    points=0;
-    enemiesVelocity=10;
-    counter_update_speed=0;
+    liveRemaining = 3;
+    points = 0;
+    enemiesVelocity = 10;
+    counter_update_speed = 0;
     cannonballOnScreen=false;
     var w = canvas.width;
     var h = canvas.height;
@@ -263,50 +362,18 @@ function resetElements() {
     pieceLength = (targetEnd - targetBeginning) / TARGET_PIECES;
     initialTargetVelocity = -h / 4; // initial target speed multiplier
 
-
     // end point of the cannon's barrel initially points horizontally
     barrelEnd.x = cannonLength;
     barrelEnd.y = h / 2;
 } // end function resetElements
 
-function newGame() {
-    
-    resetElements(); // reinitialize all game elements
-     stopTimer(); // terminate previous interval timer
-    speed_enemies_interval=setInterval(update_speed, 5000);
-    shot_interval = setInterval(updateShot,100);
-    const spacing = 40;
-    const startX = (canvas.width - (COLUMN * (2 * radius + spacing))) / 2;
-    const startY = 50;
 
-    // set every element of hitStates to false--restores target pieces
-    for (var i = 0; i < ROWS; i++) {
-        for (var j = 0; j < COLUMN; j++) {
-            const x = startX + radius + j * (2 * radius + spacing);
-            const y = startY + radius + i * (2 * radius + spacing);
-            hitStates[i][j] = new Object();
-            hitStates[i][j].hit = false; // target piece not destroyed
-            hitStates[i][j].x=x;
-            hitStates[i][j].y=y;
-        }
-    }
-    enemyShoot();
-    draw();
-
-    targetPiecesHit = 0; // no target pieces have been hit
-    targetVelocity = initialTargetVelocity; // set initial velocity
-    timeLeft = INITIAL_GAME_TIME; // start the countdown at 10 seconds
-    timerCount = 0; // the timer has fired 0 times so far
-    enemyballOnScreen = false; // the enemyball is not on the screen
-    shotsFired = 0; // set the initial number of shots fired
-    timeElapsed = 0; // set the time elapsed to zero
-    startTimer();
-        // startTimer(); // starts the game loop
-} // end function newGame
 
 function draw(){
+
     canvas.width = canvas.width; // clears the canvas (from W3C docs)
     if (cannonballOnScreen) {
+  
         context.fillStyle = "red";
         context.beginPath();
         context.arc(myShot.x,myShot.y,SHOT_RADIUS,0,Math.PI *2);
@@ -334,11 +401,11 @@ function draw(){
 // display enemy shots
     drawShots();
 
-
-   context.beginPath();
-   context.arc( ship.x,  ship.y, Myradius, 0, 2 * Math.PI);
-   context.fillStyle = 'grey';
-   context.fill();
+   context.drawImage(shipImg,ship.x,ship.y,60,60);
+//    context.beginPath();
+//    context.arc( ship.x,  ship.y, Myradius, 0, 2 * Math.PI);
+//    context.fillStyle = 'grey';
+//    context.fill();
 
     const button = document.getElementById("start");
     button.value = "Restart";
@@ -376,12 +443,12 @@ function updateLeaderboard() {
     table.style.margin = 'auto';
     table.style.borderCollapse='collapse';
     table.style.border = '2px solid black';
-    table.style.fontSize = '32px';
+    table.style.fontSize = '5vh';
     table.style.width = '60%';
-    table.style.height = '300px';
+    table.style.height = '30vh';
     table.style.color = 'black';
     let headerRow = document.createElement('thead');
-    let headerCells = ['Index', 'Score'];
+    let headerCells = ['Rank', 'Score'];
     // Create header cells and add them to the header row
     for (let i = 0; i < headerCells.length; i++) {
       let cell = document.createElement('th');
@@ -432,6 +499,8 @@ function updateShot(){
             && enemyShots[i].y>=ship.y-Myradius && enemyShots[i].y<=ship.y+Myradius){
                 enemyShots.splice(i,1);
                 liveRemaining--;
+                HittedByEnemy.currentTime = 0;
+                HittedByEnemy.play();
                 generate_ship_location();
                 
         }
@@ -439,7 +508,6 @@ function updateShot(){
     }
 }
 function drawShots(){
-        // draw enemy Shoot
         for (var i=0;i<enemyShots.length;i++){
             
             context.fillStyle = "black";
@@ -448,6 +516,7 @@ function drawShots(){
             context.fill();
             
         }
+       
 }
 function enemyShoot(){
     
@@ -464,12 +533,13 @@ function enemyShoot(){
 
 }
 function display_records(message){
-
+    GameMusic.pause();
+    GameMusic.currentTime = 0;
     var str="your records" +"\n" + record_history.name +"-\n";
     for (var i=0; i<record_history.records.length;i++){
         str+=record_history.records[i]+"\n";
     }
-    alert(message +"\n" + str);
+    alert(message);
     document.getElementById("game").style.display = "none";
     document.getElementById("after_game").style.display = "block";
     updateLeaderboard();
@@ -478,11 +548,16 @@ function display_records(message){
 function UpdatePosition() {
     var x = GetKeyPressed();
     if(liveRemaining==0){
+        youLostMusic.currentTime = 0;
+        youLostMusic.play();
         stopTimer();
         record_history.records.push(points);
         display_records("You Lost");
+
     }
     if(points==250){
+        youWonMusic.currentTime = 0;
+        youWonMusic.play();
         stopTimer();
         record_history.records.push(points);
         display_records("Champion!");
@@ -490,12 +565,16 @@ function UpdatePosition() {
     }
     if(INITIAL_GAME_TIME-time_elapes<=0.5){
         if(points<100){
+            youLostMusic.currentTime = 0;
+            youLostMusic.play();
             record_history.records.push(points);
             stopTimer();
             display_records("you can do better");
             
         }
         else{
+            youWonMusic.currentTime = 0;
+            youWonMusic.play();
             record_history.records.push(points);
             stopTimer();
             display_records("winner");
@@ -535,7 +614,7 @@ function UpdatePosition() {
             ship.x=960;
         }
     }
-    if(x==5){//space
+    if(x==5){//shoot
         if(!cannonballOnScreen){
             ShipShot(); 
             
@@ -624,8 +703,9 @@ function ShipShot(){
     // if (cannonballOnScreen) // if a cannonball is already on the screen
     // return; // do nothing
 
- // move the cannonball to be inside the cannon
-
+ // move the cannonball to be inside the cannonS
+ShipShotSound.currentTime = 0;
+ShipShotSound.play();
  myShot.x = ship.x;
  myShot.y = ship.y;
 
@@ -637,6 +717,7 @@ function ShipShot(){
 
  // play cannon fired sound
 //  cannonSound.play();
+
 }
 
 window.addEventListener("load", setupGame, false);

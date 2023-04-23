@@ -9,7 +9,7 @@
 	   <script src = "starships.js"></script>
    </head>
    <body>
-    <audio id="game_music" src="game_music.mp3" loop="true" autoplay="false"></audio>
+    <audio id="game_music" src="game_music.mp3" loop="true" preload="auto" autoplay="false"></audio>
     <audio id="hitted_by_enemy" src="hitted_by_enemy.mp3" preload="auto" autoplay="false"></audio>
     <audio id="shipshot" src="shipshot.mp3" autoplay="false" preload="auto"></audio>
     <audio id="youLostMusic" src="youLostMusic.mp3" autoplay="false" preload="auto"></audio>
@@ -25,7 +25,7 @@
       <dialog id="aboutDialog">
         <div id="aboutDialogDiv"> 
         <h1>About The Game</h1>
-        <p>Hello everyone!<br/>
+        <h2>Hello everyone!</h2><br/>
         <li>This is a game about a starship that is trying to kill all the bad enemies</li>
         <li>The starship is controlled by the arrow keys</li>
         <li>The goal is to get to the end of the game by killing all the enemies</li>
@@ -39,13 +39,26 @@
       </div>
       </dialog>
     <section id="welcome_page">
-      
-      <h1>Starship Game</h1>
+      <div class="container">
+      <h1><span class="letter" >S</span>
+        <span class="letter" >t</span>
+          <span class="letter" >a</span>
+            <span class="letter" >r</span>
+              <span class="letter" >S</span>
+                <span class="letter" >h</span>
+                  <span class="letter" >i</span>
+                    <span class="letter" >p</span>
+                    <span class="letter" > </span>
+                      <span class="letter" > G</span>
+                        <span class="letter" >a</span>
+                          <span class="letter" >m</span>
+                            <span class="letter" >e</span>
+                          </h1>
       <h2>Please sign in or sign up</h2>
      
-        
       <input class = "button" id = "sign_in_page" onclick ="sign_in_page()" type = "button" value = "sign in">
       <input class = "button" id = "sign_up_click" onclick ="sign_up_click()" type = "button" value = "sign up">
+    </div>
       </section>
 
     <section id="sign-in" style="display: none;">
@@ -57,7 +70,7 @@
             <label class="label" for="psw"><b>Password:</b></label>
             <input class="text" id="password-in" type="password" placeholder="Enter Password" name="psw" required><br>
           </form>
-            <input class = "button" id = "sign_in" onclick ="sign_in_check()" type = "button" value = "sign in"><br>
+            <input class = "button" id = "sign_in" onclick ="sign_in_check()" type = "button" value = "login"><br>
             <input class = "button" id="back_btn" type="button" value="Back" onclick = "back_to_welcome()">
           
           </div>
@@ -90,27 +103,37 @@
       <label class="label" for="shootBtn">Shoot Button:</label>
       <input class="text" type="text" id="shootKey"  placeholder="'Space as default'" maxlength="1" required><br/>
       <br>
-      <label class="label"  for="duration">Game Duration:</label>
-      <input class="text" type="number" id="duration" min="1" max="10" value="2" maxlength="1"><br/>
+
+<label class="label" for="my-selector">Game Duration:</label>
+<select id="my-selector" name="my-selector" required>
+  <option value="">--Please choose an option--</option>
+  <option value="2" selected>2 minutes </option>
+  <option value="2.5">2.5 minutes</option>
+  <option value="3">3 minutes</option>
+  <option value="3.5">3.5 minutes</option>
+  <option value="4">4 minutes</option>
+  <option value="4.5">4.5 minutes</option>
+  <option value="5">5 minutes</option>
+  <option value="5.5">5.5 minutes</option>
+  <option value="6">6 minutes</option>
+</select>
       
       <br>
-      <button class="button" onclick="setupGame()">Apply Configuration</button>
-    </div>
-    <section id="game" style="display: none;">
-      <div id="canvasGame">
-        <canvas class="canvas" id="canvas" height="700" width="1000"></canvas>
-      </div>
-     
-      <div>
-        <input class = "button" id = "start" onclick ="setupGame()" type = "button" value = "start">
-      </div>
+      <button class="button" onclick="setupGame()">Apply</button>
 
-    </section>
+    </div>
+    <div id="canvasGame" style="display: none;" >
+        <canvas class="canvas" id="canvas" height="700" width="1000"></canvas>
+        <div id = "start-div"><input class = "button" id="start" onclick="newGame()" type = "button" value = "Start"></div>
+        <div id="statGame"></div>
+    </div>
+     
     <section id = "after_game" style="display: none;">
       <div id="bottonGame">
-      <input class = "button" id = "StartNewGame" onclick ="restart()" type = "button" value = "start new game">
-      
+      <input class = "button" id = "StartNewGame" onclick ="restart()" type = "button" value = "New Game">
+
     </div>
+    <div id="endGame"></div>
     </section>
     <footer class="footer">
      <p> © 2023 Tal Abraham: 208980920  & Roi Hass: 316120054 </p>

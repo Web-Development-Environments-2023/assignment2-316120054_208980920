@@ -3,8 +3,8 @@ var users = { p: 'testuser' }
 var currnet_user = null;
 var records = {};//{user_name:score}
 var score = 0;
-var TIME_INTERVAL = 100;
-var INITIAL_GAME_TIME = 10;
+var TIME_INTERVAL = 15;
+var INITIAL_GAME_TIME = 120;
 var shootBtn= 32;
 var Myradius = 30;
 var startTime;
@@ -47,15 +47,23 @@ var enemieskilled=0;
 var record_history;
 var shot_interval;
 var speed_enemies_interval;
-    // get sounds
 var ShipShotSound;
-
 var HittedByEnemy;
-
 var GameMusic;
 var youLostMusic;
 var youWonMusic;
 var shipImg;
+var shipenemyImg1;
+var shipenemyImg2;
+var shipenemyImg3;
+var shipenemyImg4;
+var myShotImg;
+var enemyShotImg;
+var counter=0;
+var context;
+var canvas;
+var requestID;
+var started=false;
 
 var TARGET_PIECES = ROWS * COLUMN;//number of enemy ships
 
@@ -84,6 +92,7 @@ function openDialog() {
 function sign_in_page() {
     // document.getElementById("after_game").style.display = "none";
     document.getElementById("welcome_page").style.display = "none";
+    document.getElementById("canvasGame").style.display = "none";
     document.getElementById("sign-in").style.display = "block";
 
 }
@@ -122,8 +131,14 @@ function applyConfig() {
             shootBtn = event.keyCode;
         }
     });
-    INITIAL_GAME_TIME = parseInt(document.querySelector('#duration').value) * 60;
-  }
+    var selector = document.getElementById("my-selector");
+    selector.addEventListener('change', function() {
+
+        var selectedOption = parseFloat(selector.value);
+        INITIAL_GAME_TIME = selectedOption * 60;
+    });
+
+}
 // function that is called when the user click on the sign up button
 function sign_up_click() {
     var x = document.getElementById("welcome_page");
@@ -176,7 +191,7 @@ function back_to_welcome() {
     document.getElementById("sign-in").style.display = "none";
     document.getElementById("sign-up").style.display = "none";
     document.getElementById("after_game").style.display = "none";
-    document.getElementById("game").style.display = "none";
+    document.getElementById("canvasGame").style.display = "none";
     document.getElementById("canvas").style.display = "none";
     const button = document.getElementById("start");
     button.value = "Start";
@@ -186,33 +201,57 @@ function back_to_welcome() {
 }
 
   
+function PrintAreYouReady(){
+    context.font = "bold 48px Arial, Helvetica, sans-serif";
+    context.textAlign = "center";
+    context.fillStyle = "white";
+    const gradient = context.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop("0", " magenta");
+    gradient.addColorStop("0.5", "blue");
+    gradient.addColorStop("1.0", "red");
+    context.fillStyle = gradient;
+    context.fillText("ARE YOU READY?\n", canvas.width / 2, canvas.height / 2);
+    context.fillText("PRESS START", canvas.width / 2, canvas.height / 2 + 60);
 
+}
   
 function restart(){
-    context.clearRect(0,0,canvas.width,canvas.height); 
+    context.clearRect(0,0,canvas.width,canvas.height);
+    PrintAreYouReady();
     document.getElementById("after_game").style.display = "none";
-    document.getElementById("game").style.display = "block";
+    document.getElementById("canvasGame").style.display = "block";
     document.getElementById("canvas").style.display = "block";
     const button = document.getElementById("start");
     button.value = "Start";
-    start();
-}
-function start() {
-    document.getElementById("configuration").style.display = "block";
- // setupGame();
-    // newGame();
-}
-function setupGame() {
 
+}
+
+function setupGame() {
+    counter++;
     document.getElementById("configDiv").style.display = "none";
     document.getElementById("canvas").style.display = "block";
-    document.getElementById("game").style.display = "block";
-    
+    if(counter>=2){
+    document.getElementById("canvasGame").style.display = "block";
+    }
     shipImg = new Image();
     shipImg.src = "ShipPicture.png";
+    shipenemyImg1 = new Image();
+    shipenemyImg1.src = "starship1.jpg";
+    shipenemyImg2 = new Image();
+    shipenemyImg2.src = "starship2.jpg";
+    shipenemyImg3 = new Image();
+    shipenemyImg3.src = "starship3.jpg";
+    shipenemyImg4 = new Image();
+    shipenemyImg4.src = "starship4.jpg";
+    myShotImg = new Image();
+    myShotImg.src = "myShot.jpg";
+    enemyShotImg = new Image();
+    enemyShotImg.src = "enemy-shot.png";
     // get the canvas, its context and setup its click event handler
     canvas = document.getElementById("canvas");
     context = canvas.getContext("2d");
+    PrintAreYouReady();
+
     // start a new game when user clicks Start Game button
     document.getElementById("start").addEventListener(
         "click", newGame, false);
@@ -224,7 +263,7 @@ function setupGame() {
     myShot=new Object();
     enemyShots = [];
     startTime = new Date();
-    enemiesVelocity = 10;
+    enemiesVelocity = 1.5;
     direct = "left";
     generate_ship_location();
 
@@ -236,22 +275,43 @@ function setupGame() {
     ShipShotSound = document.getElementById("shipshot");
 
     HittedByEnemy = document.getElementById("hitted_by_enemy");
-
     GameMusic = document.getElementById("game_music");
     youLostMusic = document.getElementById("youLostMusic");
     youWonMusic = document.getElementById("youWonMusic");
+    GameMusic.muted = true;
+    youLostMusic.muted = true;
+    youWonMusic.muted = true;
+    ShipShotSound.muted = true;
+    HittedByEnemy.muted = true;
+    GameMusic.volume = 0.5;
+    youLostMusic.volume = 0.5;
+    youWonMusic.volume = 0.5;
+    ShipShotSound.volume = 0.2;
+    HittedByEnemy.volume = 0.2;
+
+
     // interval=setInterval(UpdatePosition, TIME_INTERVAL);
 } // end function setupGame
+
 function newGame() {
 
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    stopTimer();
     resetElements(); // reinitialize all game elements
-    stopTimer(); // terminate previous interval timer
+    started = true;
     speed_enemies_interval = setInterval(update_speed, 5000);
-    shot_interval = setInterval(updateShot,100);
-    const spacing = 40;
+    shot_interval = setInterval(updateShot,10);
+    const spacing = 60;
     const startX = (canvas.width - (COLUMN * (2 * radius + spacing))) / 2;
     const startY = 50;
+    const button = document.getElementById("start");
+    button.value = "Restart";
+    GameMusic.muted = false;
+    GameMusic.currentTime = 0;
     GameMusic.play();
+    
     // set every element of hitStates to false--restores target pieces
     for (var i = 0; i < ROWS; i++) {
         for (var j = 0; j < COLUMN; j++) {
@@ -264,7 +324,9 @@ function newGame() {
         }
     }
     enemyShoot();
+    context.clearRect(0, 0, canvas.width, canvas.height);
     draw();
+    
 
     targetPiecesHit = 0; // no target pieces have been hit
     targetVelocity = initialTargetVelocity; // set initial velocity
@@ -274,22 +336,21 @@ function newGame() {
     shotsFired = 0; // set the initial number of shots fired
     timeElapsed = 0; // set the time elapsed to zero
     startTimer();
-    
         // startTimer(); // starts the game loop
 } // end function newGame
 
 function generate_ship_location(){
-    var randomX = Math.floor(Math.random() * (canvas.width-60));
-    const centerY = canvas.height - 40;
-    if(randomX<40){
-        randomX=40;
+    var randomX = Math.floor(Math.random() * (canvas.width)*(14/15));
+    const centerY = canvas.height*(8/9);
+    if(randomX<canvas.width*(1/20)){
+        randomX=canvas.width*(1/20);
     }
     ship.x = randomX;
     ship.y = centerY;
 }
 function update_speed(){
     if(counter_update_speed<4){
-    enemiesVelocity=enemiesVelocity*1.5;
+    enemiesVelocity=enemiesVelocity*1.35;
     counter_update_speed++;
     }
 }
@@ -309,6 +370,7 @@ function GetKeyPressed() {
     if(keysDown[shootBtn]){
         return 5;
     }
+
 }
 function startTimer() {
     intervalTimer = window.setInterval(UpdatePosition, TIME_INTERVAL);
@@ -337,12 +399,17 @@ function stopTimer() {
 
 // called by function newGame to scale the size of the game elements
 // relative to the size of the canvas before the game begins
+
 function resetElements() {
+    // if(started){
+    //     stopTimer(); // terminate previous interval timer
+    // }
+    
     context.clearRect(0,0,canvas.width,canvas.height); // clear canvas
     startTime = new Date();
     liveRemaining = 3;
     points = 0;
-    enemiesVelocity = 10;
+    enemiesVelocity = 1.5;
     counter_update_speed = 0;
     cannonballOnScreen=false;
     var w = canvas.width;
@@ -365,6 +432,7 @@ function resetElements() {
     // end point of the cannon's barrel initially points horizontally
     barrelEnd.x = cannonLength;
     barrelEnd.y = h / 2;
+    
 } // end function resetElements
 
 
@@ -373,57 +441,65 @@ function draw(){
 
     canvas.width = canvas.width; // clears the canvas (from W3C docs)
     if (cannonballOnScreen) {
+        context.drawImage(myShotImg,myShot.x,myShot.y,10,30);
   
-        context.fillStyle = "red";
-        context.beginPath();
-        context.arc(myShot.x,myShot.y,SHOT_RADIUS,0,Math.PI *2);
-        // context.closePath();
-        context.fill();
+        // context.fillStyle = "white";
+        // context.beginPath();
+        // context.arc(myShot.x,myShot.y,SHOT_RADIUS,0,Math.PI *2);
+        // // context.closePath();
+        // context.fill();
     }
     context.strokeStyle="black";
     context.lineWidth=2;
     context.strokeRect(0,0,canvas.width,canvas.height);
    // display time remaining
-   context.fillStyle = "black";
+   context.fillStyle = "white";
    context.font = "bold 24px serif";
    context.textBaseline = "top";
    var time_remained = (INITIAL_GAME_TIME- time_elapes).toFixed(0);
    if(time_remained<0){
         time_remained=0;
    }
-   context.fillText("Time remaining: " + time_remained, 5, 5);
+    var div= document.getElementById("statGame");
+    // $("#statGame").innerHTML("hello");
+    var seconds = Math.floor(time_remained%60);
+    var minuts = Math.floor(time_remained/60);
+    div.innerText = "Time Left: " + minuts +":"+seconds +" \n\nScore: " + points + " \n\nLives: " + liveRemaining;
 
-      // display points 
-    context.fillText("Score: " + points, 5, 25);
+//    context.fillText("Time remaining: " + time_remained, 5, 5);
 
-    // display live
-    context.fillText('Lives: '+ liveRemaining,300,5)
+//       // display points 
+//     context.fillText("Score: " + points, 5, 25);
+
+//     // display live
+//     context.fillText('Lives: ' + liveRemaining,300,5)
 // display enemy shots
     drawShots();
 
    context.drawImage(shipImg,ship.x,ship.y,60,60);
-//    context.beginPath();
-//    context.arc( ship.x,  ship.y, Myradius, 0, 2 * Math.PI);
-//    context.fillStyle = 'grey';
-//    context.fill();
+
 
     const button = document.getElementById("start");
     button.value = "Restart";
 for (let i = 0; i < ROWS; i++) {
   for (let j = 0; j < COLUMN; j++) {
     if(!hitStates[i][j].hit){
-        context.beginPath();
-    context.arc(hitStates[i][j].x,hitStates[i][j].y, radius, 0, 2 * Math.PI);
+    //     context.beginPath();
+    // context.arc(hitStates[i][j].x,hitStates[i][j].y, radius, 0, 2 * Math.PI);
 
     if(i===0)
-        context.fillStyle = 'blue';
+        // context.fillStyle = 'blue';
+        context.drawImage(shipenemyImg1,hitStates[i][j].x,hitStates[i][j].y,60,60);
     if(i===1)
-        context.fillStyle = 'yellow';
+        // context.fillStyle = 'yellow';
+        context.drawImage(shipenemyImg2,hitStates[i][j].x,hitStates[i][j].y,60,60);
     if(i===2)
-        context.fillStyle = 'red';
+        // context.fillStyle = 'red';
+        context.drawImage(shipenemyImg3,hitStates[i][j].x,hitStates[i][j].y,60,60);
     if(i===3)
-        context.fillStyle = 'green'; 
-    context.fill();   
+        // context.fillStyle = 'green';
+        context.drawImage(shipenemyImg4,hitStates[i][j].x,hitStates[i][j].y,60,60); 
+    // context.fill();   
   }
 }
 }
@@ -446,7 +522,8 @@ function updateLeaderboard() {
     table.style.fontSize = '5vh';
     table.style.width = '60%';
     table.style.height = '30vh';
-    table.style.color = 'black';
+    table.style.color = 'white';
+    table.style.marginTop = "200px";
     let headerRow = document.createElement('thead');
     let headerCells = ['Rank', 'Score'];
     // Create header cells and add them to the header row
@@ -486,9 +563,10 @@ function updateLeaderboard() {
 
 
 function updateShot(){
+
     for(var i=0;i<enemyShots.length;i++){
         var interval = 100 /1000.0;
-        enemyShots[i].y += 40;
+        enemyShots[i].y += 4;
         if(enemyShots[i].y + radius >= canvas.height){
             enemyShots.splice(i,1);
         }
@@ -500,20 +578,22 @@ function updateShot(){
                 enemyShots.splice(i,1);
                 liveRemaining--;
                 HittedByEnemy.currentTime = 0;
+                HittedByEnemy.muted = false;
                 HittedByEnemy.play();
                 generate_ship_location();
                 
         }
     
     }
+
 }
 function drawShots(){
         for (var i=0;i<enemyShots.length;i++){
-            
-            context.fillStyle = "black";
-            context.beginPath();
-            context.arc(enemyShots[i].x, enemyShots[i].y, SHOT_RADIUS, 0, Math.PI *2);
-            context.fill();
+            context.drawImage(enemyShotImg,enemyShots[i].x,enemyShots[i].y,10,30);
+            // context.fillStyle = "black";
+            // context.beginPath();
+            // context.arc(enemyShots[i].x, enemyShots[i].y, SHOT_RADIUS, 0, Math.PI *2);
+            // context.fill();
             
         }
        
@@ -539,16 +619,20 @@ function display_records(message){
     for (var i=0; i<record_history.records.length;i++){
         str+=record_history.records[i]+"\n";
     }
-    alert(message);
-    document.getElementById("game").style.display = "none";
+    // alert(message);
+    var div = document.getElementById("endGame");
+    div.innerHTML = message;
+    document.getElementById("canvasGame").style.display = "none";
     document.getElementById("after_game").style.display = "block";
     updateLeaderboard();
     resetElements();
 }
 function UpdatePosition() {
     var x = GetKeyPressed();
+
     if(liveRemaining==0){
         youLostMusic.currentTime = 0;
+        youLostMusic.muted = false;
         youLostMusic.play();
         stopTimer();
         record_history.records.push(points);
@@ -557,6 +641,7 @@ function UpdatePosition() {
     }
     if(points==250){
         youWonMusic.currentTime = 0;
+        youWonMusic.muted = false;
         youWonMusic.play();
         stopTimer();
         record_history.records.push(points);
@@ -566,6 +651,7 @@ function UpdatePosition() {
     if(INITIAL_GAME_TIME-time_elapes<=0.5){
         if(points<100){
             youLostMusic.currentTime = 0;
+            youLostMusic.muted = false;
             youLostMusic.play();
             record_history.records.push(points);
             stopTimer();
@@ -574,6 +660,7 @@ function UpdatePosition() {
         }
         else{
             youWonMusic.currentTime = 0;
+            youWonMusic.muted = false;
             youWonMusic.play();
             record_history.records.push(points);
             stopTimer();
@@ -582,36 +669,33 @@ function UpdatePosition() {
     }
     if(x==1)//up
     {
-        if(ship.y>=520)
+        if(ship.y>=canvas.height*(2/3))
         {
-            ship.y=ship.y-60;
+            ship.y-=canvas.height*(1/100);
         }
     }
     if(x==2)//down
     {
-        if(ship.y<=600)
+        if(ship.y<=canvas.height*(8/9))
         {
-            ship.y+=60;
+            ship.y+=canvas.height*(1/100);
         }
     }
     if(x==3)//left
     {
-        if(ship.x>110)
+        if(ship.x>canvas.width*(1/20))
         {
-            ship.x-=80;
-        }
-        else if(ship.x<110 && ship.x>40){
-            ship.x=40
+            ship.x-=canvas.width*(1/100);
+            // ship.x-=2.4;
+
         }
     }
     if(x==4)//right
     {
-        if(ship.x<=880)
+        if(ship.x<=canvas.width*(14/15))
         {
-            ship.x+=80;
-        }
-        if(ship.x>880){
-            ship.x=960;
+            ship.x+=canvas.width*(1/100);
+            // ship.x+=2.4;
         }
     }
     if(x==5){//shoot
@@ -621,17 +705,18 @@ function UpdatePosition() {
         }  
 
     }
+
         for(var i=0;i<ROWS;i++){
             for(var j=0;j<COLUMN;j++){
                 hitStates[i][j].x += enemiesVelocity;
                 if(!hitStates[i][j].hit){
-                if(hitStates[i][j].x+radius>canvas.width){
-                    hitStates[i][j].x=970;
+                if(hitStates[i][j].x>canvas.width*(14/15)){
+                    hitStates[i][j].x = canvas.width*(14/15);
                     enemiesVelocity*=-1;
                     updateEnemyPosition("right");
                 }
-                if(hitStates[i][j].x<radius){
-                    hitStates[i][j].x=30;
+                if(hitStates[i][j].x<canvas.width*(1/20)){
+                    hitStates[i][j].x=canvas.width*(1/20);
                     enemiesVelocity*=-1;
                     updateEnemyPosition("left");
                 }
@@ -648,14 +733,15 @@ function UpdatePosition() {
         for (var i=0;i<ROWS;i++){
             for (var j=0;j<COLUMN;j++){
                 if(hitStates[i][j].hit==false){
-                    if(myShot.x >= hitStates[i][j].x-20 && myShot.x <= hitStates[i][j].x+20 && 
-                        myShot.y >= hitStates[i][j].y-20 && myShot.y <= hitStates[i][j].y+20 ){
+                    if(myShot.x >= hitStates[i][j].x-30 && myShot.x <= hitStates[i][j].x+30 && 
+                        myShot.y >= hitStates[i][j].y-30 && myShot.y <= hitStates[i][j].y+30 ){
                             hitStates[i][j].hit=true;
                             enemieskilled++;
                             points+=20-i*5;
                             cannonballOnScreen=false;
-                            break;
                             to_brake=true;
+                            break;
+                            
                         }
                     }
                         
@@ -676,9 +762,8 @@ function UpdatePosition() {
     draw();    
 }
 function updateEnemyPosition(direction){
-    var gap=80;
+    var gap=100;
     if(direction==="right"){
-       
         for (let i = ROWS-1; i >=0; i--) {
          for (let j = COLUMN-2; j >= 0; j--) {
             if(!hitStates[i][j].hit){
@@ -697,6 +782,26 @@ function updateEnemyPosition(direction){
 
     }
 }
+//     if(direction==="right"){
+//         for (let i = ROWS-1; i >=0; i--) {
+//          for (let j = COLUMN-1; j >= 0; j--) {
+//             if(!hitStates[i][j].hit){
+//              hitStates[i][j].x=Math.min(hitStates[i][j].x+80,canvas.width*(14/15));
+//             }
+//          }
+//      }
+//     }
+//     else{
+//         for (let i = 0; i <ROWS; i++) {
+//          for (let j = 0; j <COLUMN; j++) {
+//             if(!hitStates[i][j].hit){
+//                 hitStates[i][j].x=Math.max(hitStates[i][j].x-80,canvas.width*(1/15));
+//             }
+//          }
+
+//     }
+// }
+
 
 }
 function ShipShot(){
@@ -704,6 +809,7 @@ function ShipShot(){
     // return; // do nothing
 
  // move the cannonball to be inside the cannonS
+ ShipShotSound.muted = false;
 ShipShotSound.currentTime = 0;
 ShipShotSound.play();
  myShot.x = ship.x;
@@ -719,7 +825,6 @@ ShipShotSound.play();
 //  cannonSound.play();
 
 }
-
 window.addEventListener("load", setupGame, false);
 
 // window.addEventListener("keydown", UpdatePosition, false);

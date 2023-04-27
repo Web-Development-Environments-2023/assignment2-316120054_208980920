@@ -20,10 +20,11 @@ nav {
     height: 35px;
     margin: 10px auto; 
     
+    
     width: auto;
     font-family:Arial, Helvetica, sans-serif;
     align-items: center;
-    justify-content: center;
+    /* justify-content: center; */
     
   }
   
@@ -40,6 +41,7 @@ nav {
   }
   
   nav li {
+    
     display: inline-block;
     margin-right: 20px; /* add some space between list items */
     
@@ -49,14 +51,15 @@ nav {
     margin-right: 0; /* remove margin from last list item */
     
   }
-  nav a{
+  nav ul li a{
     color: white;
     text-decoration: none;
-   
-
+    transition: transform 0.7s ease-in-out;
+  
   }
-  nav a:hover{
+  nav ul li a:hover{
     text-decoration: underline;
+    transform: scale(1.5);
   }
 section {
     text-align: center;
@@ -93,12 +96,13 @@ section {
 #start-div{
   text-align: center;
   justify-content: center;
+  
   /* margin-bottom: -100px; */
 }
 #start{
   margin-bottom: -100px;
   bottom:calc(100%+10px);
-  margin-bottom: -20px;
+  /* margin-bottom: 30px; */
   padding: 10px 20px;
   /* padding: -30px; */
 }
@@ -187,9 +191,11 @@ h2{
     color: white;
     transition: background-color 1s ease-in-out;
     transition: color 1s ease-in-out;
-    margin: 10px;
+    /* margin: 10px; */
     /* margin-left: 30vw; */
-    padding: 10px;
+    padding: 5px;
+    
+    
 }
 .label{
     font-size: 20px;
@@ -200,16 +206,19 @@ h2{
     padding: 15px;
     
 }
-#my-selector{
+.selection{
   border: 0;
   margin: 10px 0;
   padding: 20px;
   outline: none;
   font-size: 16px;
   border-radius: 25px;
-  width: 250px;
+  width: 11vw;
   max-width:32vw;
   max-height: 10vw;
+}
+#my-selector{
+  width:20vw
 }
 .text{
     border: 0;
@@ -302,8 +311,7 @@ h2{
     position: absolute;
     top: 10px;
     left: 10px;
-    background-image: url('x.png');
-   ;
+
   }
   #aboutDialog button:hover{
     text-decoration: underline;
@@ -365,11 +373,22 @@ h2{
  .signup{
   text-align: center;
   /* justify-content: center; */
-  position: absolute;
-  margin-top: 10vh;
-  top:40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
+  margin-top: 5vh;
+  top:10%;
+  left: 20%;
+  /* transform: translate(-50%, -50%); */
+  width: 50vw;
+  height: 30vh;
+  margin-bottom: 5vh;
+ }
+ .buttons-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2vh;
+  margin-bottom: 5vh;
+  padding: 10px;
  }
  #endGame{
   position: fixed;
@@ -384,6 +403,9 @@ h2{
   text-shadow: 0 0 10px #0000;
   color: white;
   font-family:Arial, Helvetica, sans-serif;
-  
+ }
+ #StartNewGame{
+  bottom: 50px;
+
  }
 

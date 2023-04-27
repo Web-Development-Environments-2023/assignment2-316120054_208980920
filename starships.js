@@ -132,9 +132,38 @@ function sign_up_click() {
     var x = document.getElementById("welcome_page");
     x.style.display = "none";
     document.getElementById("sign-up").style.display = "block";
+    
+    var daySelect = document.getElementById("day");
+    var yearSelect = document.getElementById("year");
+  
+    // Populate day select options
+    for (var i = 1; i <= 31; i++) {
+      var option = document.createElement("option");
+      option.text = i;
+      option.value = i;
+      daySelect.appendChild(option);
+    }
+  
+    // Populate year select options
+    var currentYear = new Date().getFullYear();
+    for (var i = currentYear; i >= currentYear - 100; i--) {
+      var option = document.createElement("option");
+      option.text = i;
+      option.value = i;
+      yearSelect.appendChild(option);
+    }
 }
 
+function clear_inputs() {
+    document.getElementById("username2").value = "";
+    document.getElementById("password-up").value = "";
+    document.getElementById("psw-repeat").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("first-name").value = "";
+    document.getElementById("family-name").value = "";
+    document.getElementById("birthday").value = "";
 
+}
 // checking if the user name is already exists and if not, add it to the users dictionary
 function sign_up_check() {
     const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
@@ -155,6 +184,7 @@ function sign_up_check() {
                     record_history=new Object();
                     record_history.name= user_name;
                     record_history.records=[];
+                    clear_inputs();
                     //start();//move to the game
                     document.getElementById("configDiv").style.display = "block";
                     applyConfig();
@@ -521,11 +551,15 @@ function updateShot(){
         enemyShots[i].y += 4;
         if(enemyShots[i].y + radius >= canvas.height){
             enemyShots.splice(i,1);
+            if(enemyShots.length===0){
+                enemyShoot();
+            }
+            
         }
-        if(enemyShots[i].y>=canvas.height*(3/4)){
+        if(enemyShots[i].y >= canvas.height*(3/4)){
             enemyShoot();
         }
-        if(enemyShots[i].x>=ship.x-Myradius && enemyShots[i].x<=ship.x+Myradius
+        if(enemyShots[i].x >= ship.x-Myradius && enemyShots[i].x <= ship.x+Myradius
             && enemyShots[i].y>=ship.y-Myradius && enemyShots[i].y<=ship.y+Myradius){
                 enemyShots.splice(i,1);
                 liveRemaining--;
@@ -533,6 +567,9 @@ function updateShot(){
                 HittedByEnemy.muted = false;
                 HittedByEnemy.play();
                 generate_ship_location();
+                if(enemyShots.length===0){
+                    enemyShoot();
+                }
                 
         }
     
@@ -551,7 +588,7 @@ function drawShots(){
 function enemyShoot(){
     
     var randomRow = Math.floor(Math.random() *(ROWS));
-    var randomColumn =Math.floor(Math.random() *(COLUMN-1));
+    var randomColumn =Math.floor(Math.random() *(COLUMN));
     while(hitStates[randomRow][randomColumn].hit){
         randomRow = Math.floor(Math.random() *ROWS);
         randomColumn =Math.floor(Math.random() *COLUMN);
@@ -671,8 +708,8 @@ function update_direction_enemy(){
                     enemiesVelocity*=-1;
                     updateEnemyPosition("right");
                 }
-                if(hitStates[i][j].x<canvas.width*(1/20)){
-                    hitStates[i][j].x=canvas.width*(1/20);
+                if(hitStates[i][j].x<canvas.width*(1/30)){
+                    hitStates[i][j].x=canvas.width*(1/30);
                     enemiesVelocity*=-1;
                     updateEnemyPosition("left");
                 }
@@ -756,6 +793,7 @@ function ShipShot(){
     cannonballOnScreen = true; // the cannonball is on the screen
     
 }//end ShipShot function
+
 window.addEventListener("load", setupGame, false);
 
 // window.addEventListener("keydown", UpdatePosition, false);

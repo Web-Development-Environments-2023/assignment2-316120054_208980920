@@ -125,6 +125,8 @@ function applyConfig() {
         var selectedOption = parseFloat(selector.value);
         INITIAL_GAME_TIME = selectedOption * 60;
     });
+    selector.value = "";
+    shootKey.value = "";
 
 }
 // function that is called when the user click on the sign up button
@@ -205,6 +207,7 @@ function sign_up_check() {
 function back_to_welcome() {
     GameMusic.pause();
     GameMusic.currentTime = 0;
+    document.getElementById("configDiv").style.display = "none";
     document.getElementById("welcome_page").style.display = "block";
     document.getElementById("sign-in").style.display = "none";
     document.getElementById("sign-up").style.display = "none";
@@ -502,14 +505,16 @@ function updateLeaderboard() {
 
     }
     let table = document.createElement('table');
+    table.setAttribute('id', 'table');
     table.style.margin = 'auto';
     table.style.borderCollapse='collapse';
     table.style.border = '2px solid black';
     table.style.fontSize = '5vh';
     table.style.width = '60%';
-    table.style.height = '30vh';
+    table.style.height = '10vh';
     table.style.color = 'white';
-    table.style.marginTop = "200px";
+    table.style.marginTop = "150px";
+    
     let headerRow = document.createElement('thead');
     let headerCells = ['Rank', 'Score'];
     // Create header cells and add them to the header row
@@ -537,7 +542,8 @@ function updateLeaderboard() {
       row.appendChild(cell1);
       table.appendChild(row);
     }
-    
+    table.style.maxWidth = '700px';
+    table.style.maxHeight = '50px';
     let container = document.querySelector('#after_game');
     container.appendChild(table);
 
@@ -725,7 +731,7 @@ function end_game(){
         youLostMusic.play();
         stopTimer();
         record_history.records.push(points);
-        display_records("You Lost");
+        display_records("You Lost!");
 
     }
     if(points==250){
@@ -744,7 +750,7 @@ function end_game(){
             youLostMusic.play();
             record_history.records.push(points);
             stopTimer();
-            display_records("you can do better");
+            display_records("you can do better !");
             
         }
         else{
